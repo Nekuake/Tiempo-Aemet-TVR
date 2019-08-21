@@ -1,13 +1,8 @@
 import requests
-import urllib.request
 import json
 import os
-import ssl
-	
 
 webcams = ['logrono', 'haroo', 'calahorra']
-urlprediccionhoy = "https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio"
-
 
 
 def descargarwebcams(nombrepoblacion):
@@ -17,7 +12,8 @@ def descargarwebcams(nombrepoblacion):
     archivopoblacion.write(requests.get(urldewebcam).content)
     archivopoblacion.close()
 
-def llamadaapi(urldellamada, claveapi):
+
+def llamadaapipronostico(urldellamada, claveapi):
     payload = ""
     headers = {
         'accept': "application/json",
@@ -26,20 +22,24 @@ def llamadaapi(urldellamada, claveapi):
     respuesdeapi = requests.request("GET", urldellamada, data=payload, headers=headers)
     diccionarioderespuesta = json.loads(respuesdeapi.text)
     urlrespuesta = diccionarioderespuesta.get('datos', None)
-    #Ahora todo este rollo para que lea el texto de la url porque en la AEMET no saben cómo utilizar JSON
-    print(urlrespuesta)
-    leerurl = requests.get(urlrespuesta)
-    htmldelapagina = leerurl.content 
-    return True
-#Hay que hacer esto porque da error al intentar parsear el html por utilizar https y no detectar los certificados bien
-if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
-    getattr(ssl, '_create_unverified_context', None)):
-    ssl._create_default_https_context = ssl._create_unverified_context
+    # Ahora todo este rollo para que lea el texto de la url porque en la AEMET no saben cómo utilizar JSON
+    archivoderespuestalocal = open('temp.txt', 'wb')
+    print("Descargando archivo de texto temporal desde " + urlrespuesta)
+    archivoderespuestalocal.write(requests.get(urlrespuesta).content)
+    archivoderespuestalocal.close()
+    archivoderespuestalocal = open('temp.txt', 'rt')
+    stringderespuesta = archivoderespuestalocal.read()
+    archivoderespuestalocal.close()
+    os.remove('temp.txt')
+    stringderespuesta = (stringderespuesta.replace('\n', ''))
+    stringderespuesta = (stringderespuesta.translate({ord('\n'): None}))
+    anterior, separador, prediccion = stringderespuesta.partition("B.- PREDICCIÓN")
+    return prediccion
+
 
 # Utilizando la función, descarga las imágenes de las webcam
 for poblaciones in webcams:
     descargarwebcams(poblaciones)
 # Ahora descargaremos en un archivo de texto las predicciones utilizando la API Open Data de AEMET
-print(llamadaapi('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', ''))
-print(llamadaapi('https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', ''))
-
+print(llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', ''))
+print(llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', ''))
