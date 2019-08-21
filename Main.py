@@ -1,10 +1,9 @@
 import requests
 import urllib.request
-import pprint
 import json
 import os
 import ssl
-
+	
 
 webcams = ['logrono', 'haroo', 'calahorra']
 urlprediccionhoy = "https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio"
@@ -27,11 +26,11 @@ def llamadaapi(urldellamada, claveapi):
     respuesdeapi = requests.request("GET", urldellamada, data=payload, headers=headers)
     diccionarioderespuesta = json.loads(respuesdeapi.text)
     urlrespuesta = diccionarioderespuesta.get('datos', None)
+    #Ahora todo este rollo para que lea el texto de la url porque en la AEMET no saben cómo utilizar JSON
     print(urlrespuesta)
-    leerurl = urllib.request.urlopen(urlrespuesta)
-    textoderespuesta = leerurl.read()
-
-    return textoderespuesta
+    leerurl = requests.get(urlrespuesta)
+    htmldelapagina = leerurl.content 
+    return True
 #Hay que hacer esto porque da error al intentar parsear el html por utilizar https y no detectar los certificados bien
 if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
     getattr(ssl, '_create_unverified_context', None)):
@@ -42,5 +41,5 @@ for poblaciones in webcams:
     descargarwebcams(poblaciones)
 # Ahora descargaremos en un archivo de texto las predicciones utilizando la API Open Data de AEMET
 print(llamadaapi('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', ''))
-print(llamadaapi('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', ''))
+print(llamadaapi('https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', ''))
 
