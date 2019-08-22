@@ -5,7 +5,6 @@ import json
 import os
 from docx import Document
 from datetime import date
-from win32com import client
 
 
 webcams = ['logrono', 'haroo', 'calahorra']
