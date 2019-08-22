@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import requests
 import json
 import os
@@ -22,7 +24,7 @@ def llamadaapipronostico(urldellamada, claveapi):
     respuesdeapi = requests.request("GET", urldellamada, data=payload, headers=headers)
     diccionarioderespuesta = json.loads(respuesdeapi.text)
     urlrespuesta = diccionarioderespuesta.get('datos', None)
-    # Ahora todo este rollo para que lea el texto de la url porque en la AEMET no saben cómo utilizar JSON
+    # Ahora este rollo porque los de la AEMET no saben utilizar correctamente JSON
     archivoderespuestalocal = open('temp.txt', 'wb')
     print("Descargando archivo de texto temporal desde " + urlrespuesta)
     archivoderespuestalocal.write(requests.get(urlrespuesta).content)
@@ -31,7 +33,7 @@ def llamadaapipronostico(urldellamada, claveapi):
     stringderespuesta = archivoderespuestalocal.read()
     archivoderespuestalocal.close()
     os.remove('temp.txt')
-    stringderespuesta = (stringderespuesta.replace('\n', ''))
+    stringderespuesta = (stringderespuesta.replace('\n', ' '))
     stringderespuesta = (stringderespuesta.translate({ord('\n'): None}))
     anterior, separador, prediccion = stringderespuesta.partition("B.- PREDICCIÓN")
     return prediccion
@@ -41,5 +43,11 @@ def llamadaapipronostico(urldellamada, claveapi):
 for poblaciones in webcams:
     descargarwebcams(poblaciones)
 # Ahora descargaremos en un archivo de texto las predicciones utilizando la API Open Data de AEMET
-print(llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', ''))
-print(llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', ''))
+with open ('Guion_pronosticos.txt', 'w') as archivopronosticos:
+    archivopronosticos.write('Pronosticos\n')
+    archivopronosticos.write('Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela \n')
+    archivopronosticos.write('\nHoy,' + llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', ''))
+    archivopronosticos.write('\nMañana,' + llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', ''))
+    archivopronosticos.write('\nLes dejamos con las imágenes que nos envían nuestros colaboradores del tiempo')
+
+
