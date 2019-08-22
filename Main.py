@@ -3,6 +3,10 @@
 import requests
 import json
 import os
+from docx import Document
+from datetime import date
+from win32com import client
+
 
 webcams = ['logrono', 'haroo', 'calahorra']
 
@@ -29,7 +33,7 @@ def llamadaapipronostico(urldellamada, claveapi):
     print("Descargando archivo de texto temporal desde " + urlrespuesta)
     archivoderespuestalocal.write(requests.get(urlrespuesta).content)
     archivoderespuestalocal.close()
-    archivoderespuestalocal = open('temp.txt', 'rt')
+    archivoderespuestalocal = open('temp.txt', 'rt', encoding='windows-1252')
     stringderespuesta = archivoderespuestalocal.read()
     archivoderespuestalocal.close()
     os.remove('temp.txt')
@@ -39,6 +43,21 @@ def llamadaapipronostico(urldellamada, claveapi):
     return prediccion
 
 
+def creardocxpronostico(hoy, manana):
+    documentodesalida = Document()
+    nombredocumento = ('guion' + (str(date.today()))+'.docx')
+    print(nombredocumento)
+    documentodesalida.add_heading('GUIÓN VOZ EN OFF TIEMPO ' + str(date.today()), 0)
+    documentodesalida.add_paragraph('Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela.', style=None)
+    documentodesalida.add_paragraph(hoy, style=None)
+    documentodesalida.add_paragraph(manana, style=None)
+    documentodesalida.add_paragraph('Les dejamos con las imágenes que nos envían nuestros colaboradores del tiempo. \n\n\n')
+    documentodesalida.add_paragraph('BETA')
+    documentodesalida.save(nombredocumento)
+    os.startfile(nombredocumento)
+    os.remove('Guion_pronosticos.txt')
+
+
 # Utilizando la función, descarga las imágenes de las webcam
 for poblaciones in webcams:
     descargarwebcams(poblaciones)
@@ -46,8 +65,11 @@ for poblaciones in webcams:
 with open ('Guion_pronosticos.txt', 'w') as archivopronosticos:
     archivopronosticos.write('Pronosticos\n')
     archivopronosticos.write('Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela \n')
-    archivopronosticos.write('\nHoy,' + llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', ''))
-    archivopronosticos.write('\nMañana,' + llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', ''))
+    pronosticohoy =llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', '')
+    pronosticomanana = llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', '')
+    archivopronosticos.write('\nHoy,' + pronosticohoy)
+    archivopronosticos.write('\nMañana,' + pronosticomanana)
     archivopronosticos.write('\nLes dejamos con las imágenes que nos envían nuestros colaboradores del tiempo')
+creardocxpronostico(pronosticohoy, pronosticomanana)
 
 
