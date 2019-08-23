@@ -5,10 +5,21 @@ import json
 import os
 from docx import Document
 from datetime import date
-
+import platform
 
 webcams = ['logrono', 'haroo', 'calahorra']
-
+codigosmunicipio= {
+    'calahorra' : 26036,
+    'logrono' : 26089,
+    'alfaro' : 26011,
+    'arnedo' : 26018,
+    'cervera' : 26047,
+    'ezcaray' : 26061,
+    'haro' : 26071,
+    'domingo' : 26138,
+    'torrecilla' : 26151,
+    'najera' : 26102,
+    }
 
 def descargarwebcams(nombrepoblacion):
     archivopoblacion = open(nombrepoblacion + '.jpg', 'wb')
@@ -53,9 +64,16 @@ def creardocxpronostico(hoy, manana):
     documentodesalida.add_paragraph('Les dejamos con las imágenes que nos envían nuestros colaboradores del tiempo. \n\n\n')
     documentodesalida.add_paragraph('BETA')
     documentodesalida.save(nombredocumento)
-    os.startfile(nombredocumento)
+    if platform.system == 'Windows':
+        os.startfile(nombredocumento, 'print')
     os.remove('Guion_pronosticos.txt')
 
+def importartemperaturas(municipio):
+    payload = ''
+    headers = {
+        'accept': 'application/json',
+        'api_key' : 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhaHVydGFkb0B0dnJpb2phLmNvbSIsImp0aSI6IjBiYzQxMGQyLTc1NjAtNDYyMS05ZjgxLTEwOWE4N2YxZDE2YSIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTY1Njk1OTk2LCJ1c2VySWQiOiIwYmM0MTBkMi03NTYwLTQ2MjEtOWY4MS0xMDlhODdmMWQxNmEiLCJyb2xlIjoiIn0.kykNwBojwUwqO8r16SZ1NfdLxV2Bv-PR1PJUpBhxBMM'
+    }
 
 # Utilizando la función, descarga las imágenes de las webcam
 for poblaciones in webcams:

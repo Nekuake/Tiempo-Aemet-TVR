@@ -10,3 +10,5 @@ logrono.jpg
 Guion_pronosticos.txt
 
 *.docx
+
+__pycache__/
