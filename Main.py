@@ -1,3 +1,4 @@
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import requests
@@ -6,19 +7,20 @@ import os
 from docx import Document
 from datetime import date
 import platform
-
+import pprint
+print('Script de generación automatica de predicción utilizando datos generados por la API de la AEMET, programado por Alejandro Hurtado, para TV Rioja')
 webcams = ['logrono', 'haroo', 'calahorra']
 codigosmunicipio = {
-    'calahorra': 26036,
-    'logrono': 26089,
-    'alfaro': 26011,
-    'arnedo': 26018,
-    'cervera': 26047,
-    'ezcaray': 26061,
-    'haro': 26071,
-    'domingo': 26138,
-    'torrecilla': 26151,
-    'najera': 26102,
+    'calahorra': '26036',
+    'logrono': '26089',
+    'alfaro': '26011',
+    'arnedo': '26018',
+    'cervera': '26047',
+    'ezcaray': '26061',
+    'haro': '26071',
+    'domingo': '26138',
+    'torrecilla': '26151',
+    'najera': '26102',
 }
 
 
@@ -57,7 +59,7 @@ def llamadaapipronostico(urldellamada, claveapi):
 def creardocxpronostico(hoy, manana):
     documentodesalida = Document()
     nombredocumento = ('guion' + (str(date.today())) + '.docx')
-    print(nombredocumento)
+    print('El nombre del docx que se creará como guión es ' + nombredocumento)
     documentodesalida.add_heading('GUIÓN VOZ EN OFF TIEMPO ' + str(date.today()), 0)
     documentodesalida.add_paragraph('Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela.',
                                     style=None)
@@ -65,18 +67,17 @@ def creardocxpronostico(hoy, manana):
     documentodesalida.add_paragraph(manana, style=None)
     documentodesalida.add_paragraph(
         'Les dejamos con las imágenes que nos envían nuestros colaboradores del tiempo. \n\n\n')
-    documentodesalida.add_paragraph('BETA')
     documentodesalida.save(nombredocumento)
-    print(platform.system())
+    print('Está usando un sistema ' + platform.system() + ' si no es Windows es probable que falle el intento de impresión.')
     try:
         #os.startfile(nombredocumento, 'print')
-        print('Aquí se imprimiría.')
+        print('Aquí se imprimiría, pero de momento está desactivado para favorecer el debug.')
     except:
         print("Error de impresión")
     os.remove('Guion_pronosticos.txt')
 
 
-def importarprediccionesespecificas(municipio):
+def importarprediccionesespecificas(municipio, nombremunicipio):
     payload = ''
     headers = {
         'accept': 'application/json',
@@ -89,8 +90,66 @@ def importarprediccionesespecificas(municipio):
     archivojsonderespuesta = open('temp.json', 'wb')
     print("Descargando archivo de texto temporal desde " + urlrespuesta)
     archivojsonderespuesta.write(requests.get(urlrespuesta).content)
-
-
+    archivojsonderespuesta.close()
+    with open('temp.json', 'r', encoding= 'windows-1252') as archivojson:
+        datos=archivojson.read()
+    #A partir de aquí el código se vuelve raro, pero es fácil de entender. Adjunto documentación, así que tranquilidad. Hago muchas variables y doy muchas vueltas porque he ido aprendiendo cómo iba su API a la vez que programaba. Todo quedará claro en la doc. 
+    diccionariodeprediccion = json.loads(datos)
+    diossabequeestoyhaciendo= (diccionariodeprediccion[0])
+    predicciondiccionario = diossabequeestoyhaciendo['prediccion']
+    predicciondiccionario=predicciondiccionario['dia']
+    diauno = predicciondiccionario[0]
+    diados = predicciondiccionario[1]
+    diatres = predicciondiccionario[2]
+    diacuatro = predicciondiccionario[3]
+    diacinco = predicciondiccionario[4]
+    #Importa en variable la probabilidad de precipitación general del primer día
+    precipitacionuno = diauno['probPrecipitacion']
+    precipitacionuno = precipitacionuno[0]
+    cantidadprecipitacionuno = precipitacionuno['value']
+    print('Hoy, el porcentaje de probabilidad de precipitacion en ' + nombremunicipio + '  es ' + str(cantidadprecipitacionuno) + '%')
+    #Importa en variable la probabilidad de precipitación general del segundo día
+    precipitaciondos = diados['probPrecipitacion']
+    precipitaciondos = precipitaciondos [0]
+    cantidadprecipitaciondos = precipitaciondos['value']
+    print('Mañana, el porcentaje de probabilidad de precipitacion en ' + nombremunicipio + ' es ' + str(cantidadprecipitaciondos) + '%')
+    #Importa en variable la probabilidad de precipitación general del tercer día
+    precipitaciontres = diatres['probPrecipitacion']
+    precipitaciontres = precipitaciontres [0]
+    cantidadprecipitaciontres = precipitaciontres ['value']
+    print ('Pasado-mañana, el porcentaje de probabilidad de precipitacion en ' + nombremunicipio + ' es ' + str(cantidadprecipitaciontres) + '%')
+    #Importa en variable la probabilidad de precipitación general del cuarto día
+    precipitacioncuatro = diacuatro['probPrecipitacion']
+    precipitacioncuatro = precipitacioncuatro [0]
+    cantidadprecipitacioncuatro = precipitacioncuatro ['value']
+    #Importa en variable la probabilidad de precipitación general del quinto día
+    precipitacioncinco = diacinco['probPrecipitacion']
+    precipitacioncinco = precipitacioncinco [0]
+    cantidadprecipitacioncinco = precipitacioncinco ['value']
+    #Una vez importadas las probabilidades de lluvia, ahora iremos a las posibles temperaturas.
+    tempuno = diauno['temperatura']
+    tempmaxuno = tempuno['maxima']
+    tempminuno = tempuno['minima']
+    print('La mínima de hoy en ' + nombremunicipio + ' ' + str(tempminuno) + 'º y la máxima es de ' + str(tempmaxuno) + 'º')
+    #La temperatura de mañana...
+    tempdos = diados['temperatura']
+    tempmaxdos = tempdos['maxima']
+    tempmindos = tempdos['minima']
+    print('La mínima de mañana en ' + nombremunicipio + ' ' + str(tempmindos) + 'º y la máxima es de ' + str(tempmaxdos) + 'º')
+    #La temperatura de pasadomañana...
+    temptres = diatres['temperatura']
+    tempmaxtres = temptres['maxima']
+    tempmintres = temptres['minima']
+    print('La mínima de pasadomañana en ' + nombremunicipio + ' ' + str(tempmintres) + 'º y la máxima es de ' + str(tempmaxtres) + 'º')
+    #And so on... 
+    tempcuatro = diacuatro['temperatura']
+    tempmaxcuatro = tempcuatro['maxima']
+    tempmincuatro = tempcuatro['minima']
+    #Por ultimo, la temperatura del dia cinco
+    tempcinco = diacinco['temperatura']
+    tempmaxcinco = tempcinco['maxima']
+    tempmincinco = tempcinco['minima']
+    #Ahora el estado del cielo, que este tiene más intringulis. La AEMET devuelve un código y una descre
 
 
 # Utilizando la función, descarga las imágenes de las webcam
@@ -106,3 +165,8 @@ with open('Guion_pronosticos.txt', 'w') as archivopronosticos:
     archivopronosticos.write('\nMañana,' + pronosticomanana)
     archivopronosticos.write('\nLes dejamos con las imágenes que nos envían nuestros colaboradores del tiempo')
 creardocxpronostico(pronosticohoy, pronosticomanana)
+importarprediccionesespecificas(codigosmunicipio['calahorra'], 'Calahorra')
+importarprediccionesespecificas(codigosmunicipio['logrono'], 'Logroño')
+importarprediccionesespecificas(codigosmunicipio['haro'], 'Haro')
+
+terminarscript = input('Pulse Intro para terminar...')

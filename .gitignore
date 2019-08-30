@@ -12,3 +12,7 @@ Guion_pronosticos.txt
 *.docx
 
 __pycache__/
+
+dist/Main/
+
+Main.spec
