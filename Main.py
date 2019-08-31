@@ -5,6 +5,8 @@ import json
 import os
 from docx import Document
 from datetime import date
+import datetime
+import calendar
 import platform
 import pprint
 import configparser
@@ -109,6 +111,24 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
                 'NO SE RECONOCE EL CÓDIGO. SE VA A PONER EL CÓDIGO DE NUBLADO COMO PLACEHOLDER PERO HAY QUE REVISAR EL CODIGO RECIBIDO.')
             return '2'
 
+    def interpretafecha(fecha):
+        conversionfecha = datetime.datetime.strptime(fecha, '%Y-%m-%d').weekday()
+        conversionfecha=(calendar.day_name[conversionfecha])
+        if conversionfecha == 'Monday':
+            return 1
+        elif conversionfecha == 'Tuesday':
+            return 2
+        elif conversionfecha == 'Wednesday':
+            return 3
+        elif conversionfecha == 'Thursday':
+            return 4
+        elif conversionfecha == 'Friday':
+            return 5
+        elif conversionfecha == 'Saturday':
+            return 6
+        elif conversionfecha == 'Sunday':
+            return 7
+
     payload = ''
     headers = {
         'accept': 'application/json',
@@ -136,6 +156,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     diatres = predicciondiccionario[2]
     diacuatro = predicciondiccionario[3]
     diacinco = predicciondiccionario[4]
+    diaseis = predicciondiccionario[5]
     # Importa en variable la probabilidad de precipitación general del primer día
     precipitacionuno = diauno['probPrecipitacion']
     precipitacionuno = precipitacionuno[0]
@@ -162,6 +183,10 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     precipitacioncinco = diacinco['probPrecipitacion']
     precipitacioncinco = precipitacioncinco[0]
     cantidadprecipitacioncinco = precipitacioncinco['value']
+    #Sexto día
+    precipitacionseis = diaseis['probPrecipitacion']
+    precipitacionseis = precipitacionseis[0]
+    cantidadprecipitacionseis = precipitacionseis['value']
     # Una vez importadas las probabilidades de lluvia, ahora iremos a las posibles temperaturas.
     tempuno = diauno['temperatura']
     tempmaxuno = tempuno['maxima']
@@ -188,6 +213,10 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     tempcinco = diacinco['temperatura']
     tempmaxcinco = tempcinco['maxima']
     tempmincinco = tempcinco['minima']
+    #Temperaturas de sexto dia
+    tempseis = diaseis['temperatura']
+    tempmaxseis = tempseis['maxima']
+    tempminseis = tempseis['minima']
     # Ahora el estado del cielo, que este tiene más intringulis. Primer estado
     estadouno = diauno['estadoCielo']
     estadouno = estadouno[0]
@@ -218,29 +247,58 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     estadocinco = estadocinco['value']
     print(estadocinco)
     estadocinco = interpretarcodigosestado(estadocinco)
+    #Estado del cielo seis
+    estadoseis = diaseis['estadoCielo']
+    estadoseis = estadoseis[0]
+    estadoseis = estadoseis['value']
+    print(estadoseis)
+    estadoseis = interpretarcodigosestado(estadoseis)
+    #Ahora cogeremos las fechas porque las necesitamos para escribir los dias de la semana
+    fechauno = interpretafecha(diauno['fecha'])
+    print(fechauno)
+    fechados = interpretafecha(diados['fecha'])
+    print(fechados)
+    fechatres = interpretafecha(diatres['fecha'])
+    print(fechatres)
+    fechacuatro = interpretafecha(diacuatro['fecha'])
+    print(fechacuatro)
+    fechacinco = interpretafecha(diacinco['fecha'])
+    print(fechacinco)
+    fechaseis = interpretafecha(diaseis['fecha'])
+    print(fechaseis)
     # A ver ahora como escribo en un archivo ini toda esta basura
     configuracion = configparser.ConfigParser()
     configuracion['GENERAL'] = {'ciudad': nombremunicipio}
     configuracion['DIAUNO'] = {'tempmin': tempminuno,
                                'tempmax': tempmaxuno,
                                'estadocielo': estadouno,
-                               'probprec': cantidadprecipitacionuno}
+                               'probprec': cantidadprecipitacionuno,
+                               'fecha': fechauno}
     configuracion['DIADOS'] = {'tempmin': tempmindos,
                                'tempmax': tempmaxdos,
                                'estadocielo': estadodos,
-                               'probprec': cantidadprecipitaciondos}
+                               'probprec': cantidadprecipitaciondos,
+                               'fecha': fechados}
     configuracion['DIATRES'] = {'tempmin': tempmintres,
                                 'tempmax': tempmaxtres,
                                 'estadocielo': estadotres,
-                                'probprec': cantidadprecipitaciontres}
+                                'probprec': cantidadprecipitaciontres,
+                                'fecha' : fechatres}
     configuracion['DIACUATRO'] = {'tempmin': tempmincuatro,
                                   'tempmax': tempmaxcuatro,
                                   'estadocielo': estadocuatro,
-                                  'probprec': cantidadprecipitacioncuatro}
+                                  'probprec': cantidadprecipitacioncuatro,
+                                  'fecha' : fechacuatro}
     configuracion['DIACINCO'] = {'tempmin': tempmincinco,
                                  'tempmax': tempmaxcinco,
                                  'estadocielo': estadocinco,
-                                 'probprec': cantidadprecipitacioncinco}
+                                 'probprec': cantidadprecipitacioncinco,
+                                 'fecha' : fechacinco}
+    configuracion['DIASEIS'] = {'tempmin': tempminseis,
+                                 'tempmax': tempmaxseis,
+                                 'estadocielo': estadoseis,
+                                 'probprec': cantidadprecipitacionseis,
+                                 'fecha' : fechaseis}
     nombredearchivo = str(nombremunicipio + '.ini')
     with open('predicciones/' + nombredearchivo, 'w') as archivopredic:
         configuracion.write(archivopredic)
@@ -268,5 +326,20 @@ creardocxpronostico(pronosticohoy, pronosticomanana)
 importarprediccionesespecificas(codigosmunicipio['calahorra'], 'Calahorra')
 importarprediccionesespecificas(codigosmunicipio['logrono'], 'Logroño')
 importarprediccionesespecificas(codigosmunicipio['haro'], 'Haro')
+importarprediccionesespecificas(codigosmunicipio['alfaro'], 'Alfaro')
+importarprediccionesespecificas(codigosmunicipio['torrecilla'], 'Torrecilla')
+importarprediccionesespecificas(codigosmunicipio['najera'], 'Najera')
+importarprediccionesespecificas(codigosmunicipio['domingo'], 'StoDomingo')
+importarprediccionesespecificas(codigosmunicipio['cervera'], 'Cervera')
+importarprediccionesespecificas(codigosmunicipio['arnedo'], 'Arnedo')
+importarprediccionesespecificas(codigosmunicipio['ezcaray'], 'Ezcaray')
+
+
+
+
+
+
+
+
 
 terminarscript = input('Pulse Intro para terminar...')
