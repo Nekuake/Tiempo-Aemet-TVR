@@ -246,7 +246,12 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
         configuracion.write(archivopredic)
     os.remove('temp.json')
 
-
+if not os.path.isdir('./webcams'):
+        os.mkdir('webcams')
+if not os.path.isdir('./guiones'):
+        os.mkdir('guiones')
+if not os.path.isdir('./predicciones'):
+        os.mkdir('predicciones')
 # Utilizando la función, descarga las imágenes de las webcam
 for poblaciones in webcams:
     descargarwebcams(poblaciones)
