@@ -27,7 +27,7 @@ codigosmunicipio = {
 
 
 def descargarwebcams(nombrepoblacion):
-    archivopoblacion = open(nombrepoblacion + '.jpg', 'wb')
+    archivopoblacion = open('webcams/'+ nombrepoblacion + '.jpg', 'wb')
     urldewebcam = ('https://actualidad.larioja.org/images/webcam/' + nombrepoblacion + '.jpg')
     print('Descargando imagen de webcam desde ' + urldewebcam)
     archivopoblacion.write(requests.get(urldewebcam).content)
@@ -60,7 +60,7 @@ def llamadaapipronostico(urldellamada, claveapi):
 
 def creardocxpronostico(hoy, manana):
     documentodesalida = Document()
-    nombredocumento = ('guion' + (str(date.today())) + '.docx')
+    nombredocumento = ('guiones/guion' + (str(date.today())) + '.docx')
     print('El nombre del docx que se creará como guión es ' + nombredocumento)
     documentodesalida.add_heading('GUIÓN VOZ EN OFF TIEMPO ' + str(date.today()), 0)
     documentodesalida.add_paragraph('Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela.',
@@ -242,7 +242,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
                                  'estadocielo': estadocinco,
                                  'probprec': cantidadprecipitacioncinco}
     nombredearchivo = str(nombremunicipio + '.ini')
-    with open(nombredearchivo, 'w') as archivopredic:
+    with open('predicciones/' + nombredearchivo, 'w') as archivopredic:
         configuracion.write(archivopredic)
     os.remove('temp.json')
 
