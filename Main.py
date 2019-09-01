@@ -85,30 +85,36 @@ def creardocxpronostico(hoy, manana):
 
 def importarprediccionesespecificas(municipio, nombremunicipio):
     def interpretarcodigosestado(codigo):
-        if codigo == 11:
-            print('Despejado')
+        codigo=str(codigo)
+        medionuboso = ['12', '13', '14', '15', '17']
+        mediolluvia = ['23', '24', '25', '43', '44', '45']
+        lluvia = ['26', '27', '46']
+        nieve = ['33', '34', '35', '36']
+        print (codigo)
+        if codigo == '11':
+            #print('Despejado')
             return '1'
-        elif codigo == range(12, 15) or 17:
-            print('Medio nuboso')
+        elif codigo in medionuboso:
+            #print('Medio nuboso')
             return '2'
-        elif codigo == 16:
-            print('Cubierto')
+        elif codigo == '16':
+            #print('Cubierto')
             return '3'
-        elif codigo == range(23, 25):
-            print('Medio lluvia')
+        elif codigo in mediolluvia:
+            #print('Medio lluvia')
             return '5'
-        elif codigo == 26 or 27:
-            print('Lluvia')
+        elif codigo in lluvia:
+            #print('Lluvia')
             return '6'
-        elif codigo == range(33, 36):
-            print('Nieve')
+        elif codigo in nieve:
+            #print('Nieve')
             return '4'
-        elif codigo == 53:
-            print('Tormenta')
+        elif codigo == '53':
+            #print('Tormenta')
             return '7'
         else:
             print(
-                'NO SE RECONOCE EL CÓDIGO. SE VA A PONER EL CÓDIGO DE NUBLADO COMO PLACEHOLDER PERO HAY QUE REVISAR EL CODIGO RECIBIDO.')
+                'NO SE RECONOCE EL CÓDIGO: ' + codigo + ' . SE VA A PONER EL CÓDIGO DE NUBLADO COMO PLACEHOLDER PERO HAY QUE REVISAR EL CODIGO RECIBIDO.')
             return '2'
 
     def interpretafecha(fecha):
@@ -220,52 +226,46 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     # Ahora el estado del cielo, que este tiene más intringulis. Primer estado
     estadouno = diauno['estadoCielo']
     estadouno = estadouno[0]
+    print(estadouno['descripcion'])
     estadouno = estadouno['value']
-    print(estadouno)
     estadouno = interpretarcodigosestado(estadouno)
     # Estado del cielo dos
     estadodos = diados['estadoCielo']
     estadodos = estadodos[0]
+    print(estadodos['descripcion'])
     estadodos = estadodos['value']
-    print(estadodos)
     estadodos = interpretarcodigosestado(estadodos)
     # Estado del cielo tres
     estadotres = diatres['estadoCielo']
     estadotres = estadotres[0]
+    print(estadotres['descripcion'])
     estadotres = estadotres['value']
-    print(estadotres)
     estadotres = interpretarcodigosestado(estadotres)
     # Estad del cuelo cuatro
     estadocuatro = diacuatro['estadoCielo']
     estadocuatro = estadocuatro[0]
+    print(estadocuatro['descripcion'])
     estadocuatro = estadocuatro['value']
-    print(estadocuatro)
     estadocuatro = interpretarcodigosestado(estadocuatro)
     # Estado del cielo cinco
     estadocinco = diacinco['estadoCielo']
     estadocinco = estadocinco[0]
+    print(estadocinco['descripcion'])
     estadocinco = estadocinco['value']
-    print(estadocinco)
     estadocinco = interpretarcodigosestado(estadocinco)
     #Estado del cielo seis
     estadoseis = diaseis['estadoCielo']
     estadoseis = estadoseis[0]
+    print(estadoseis['descripcion'])
     estadoseis = estadoseis['value']
-    print(estadoseis)
     estadoseis = interpretarcodigosestado(estadoseis)
     #Ahora cogeremos las fechas porque las necesitamos para escribir los dias de la semana
     fechauno = interpretafecha(diauno['fecha'])
-    print(fechauno)
     fechados = interpretafecha(diados['fecha'])
-    print(fechados)
     fechatres = interpretafecha(diatres['fecha'])
-    print(fechatres)
     fechacuatro = interpretafecha(diacuatro['fecha'])
-    print(fechacuatro)
     fechacinco = interpretafecha(diacinco['fecha'])
-    print(fechacinco)
     fechaseis = interpretafecha(diaseis['fecha'])
-    print(fechaseis)
     # A ver ahora como escribo en un archivo ini toda esta basura
     configuracion = configparser.ConfigParser()
     configuracion['GENERAL'] = {'ciudad': nombremunicipio}
