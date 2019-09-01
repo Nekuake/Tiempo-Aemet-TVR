@@ -10,6 +10,9 @@
     <background>background\calahorra</background>
   </backgrounds>
   <paths name="paths"/>
+  <objects name="objects">
+    <object>objects\Controlador_Calahorra</object>
+  </objects>
   <rooms name="rooms">
     <room>rooms\room0</room>
   </rooms>

@@ -10,6 +10,7 @@ import calendar
 import platform
 import pprint
 import configparser
+from PIL import Image
 
 print(
     'Script de generación automatica de predicción utilizando datos generados por la API de la AEMET, programado por Alejandro Hurtado, para TV Rioja')
@@ -34,6 +35,11 @@ def descargarwebcams(nombrepoblacion):
     print('Descargando imagen de webcam desde ' + urldewebcam)
     archivopoblacion.write(requests.get(urldewebcam).content)
     archivopoblacion.close()
+    convertirimagen = Image.open('webcams/' + nombrepoblacion + '.jpg')
+    finalimagen = convertirimagen.convert(mode='P', palette=Image.ADAPTIVE)
+    finalimagen.save('webcams/' + nombrepoblacion + '.png', 'PNG',optimize=True,quality=10)
+    os.remove('webcams/' + nombrepoblacion + '.jpg')
+
 
 
 def llamadaapipronostico(urldellamada, claveapi):
