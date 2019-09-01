@@ -112,6 +112,9 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
         elif codigo == '53':
             #print('Tormenta')
             return '7'
+        elif codigo == ' ':
+            print("NO SE HAN RECIBIDO DATOS... INTENTELO MÁS TARDE PORQUE ES ERROR DE AEMET. SE DEVUELVE NUBLADO COMO PLACEHOLDER.")
+            return '2'
         else:
             print(
                 'NO SE RECONOCE EL CÓDIGO: ' + codigo + ' . SE VA A PONER EL CÓDIGO DE NUBLADO COMO PLACEHOLDER PERO HAY QUE REVISAR EL CODIGO RECIBIDO.')
