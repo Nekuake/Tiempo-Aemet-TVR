@@ -1,4 +1,4 @@
-# !/usr/bin/python
+﻿# !/usr/bin/python
 # -*- coding: utf-8 -*-
 import requests
 import json
@@ -11,10 +11,12 @@ import platform
 import pprint
 import configparser
 from PIL import Image
+import time
+#Anterior API key:"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhaHVydGFkb0B0dnJpb2phLmNvbSIsImp0aSI6IjBiYzQxMGQyLTc1NjAtNDYyMS05ZjgxLTEwOWE4N2YxZDE2YSIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTY1Njk1OTk2LCJ1c2VySWQiOiIwYmM0MTBkMi03NTYwLTQ2MjEtOWY4MS0xMDlhODdmMWQxNmEiLCJyb2xlIjoiIn0.kykNwBojwUwqO8r16SZ1NfdLxV2Bv-PR1PJUpBhxBMM"
 
 print(
     'Script de generación automatica de predicción utilizando datos generados por la API de la AEMET, programado por Alejandro Hurtado, para TV Rioja')
-webcams = ['logrono', 'haroo', 'calahorra']
+webcams = ['logrono', 'haroo', 'calahorra', 'alfaro', 'cervera', 'najera', 'torrecilla', 'navarrete', 'stodomingo']
 codigosmunicipio = {
     'calahorra': '26036',
     'logrono': '26089',
@@ -36,7 +38,9 @@ def descargarwebcams(nombrepoblacion):
     archivopoblacion.write(requests.get(urldewebcam).content)
     archivopoblacion.close()
     convertirimagen = Image.open('webcams/' + nombrepoblacion + '.jpg')
-    finalimagen = convertirimagen.convert(mode='P', palette=Image.ADAPTIVE)
+    w, h =convertirimagen.size
+    finalimagen=convertirimagen.crop((0,76, w, h))
+    finalimagen = convertirimagen.resize((1920,1080))
     finalimagen.save('webcams/' + nombrepoblacion + '.png', 'PNG',optimize=True,quality=10)
     os.remove('webcams/' + nombrepoblacion + '.jpg')
 
@@ -46,7 +50,7 @@ def llamadaapipronostico(urldellamada, claveapi):
     payload = ""
     headers = {
         'accept': "application/json",
-        'api_key': "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhaHVydGFkb0B0dnJpb2phLmNvbSIsImp0aSI6IjBiYzQxMGQyLTc1NjAtNDYyMS05ZjgxLTEwOWE4N2YxZDE2YSIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTY1Njk1OTk2LCJ1c2VySWQiOiIwYmM0MTBkMi03NTYwLTQ2MjEtOWY4MS0xMDlhODdmMWQxNmEiLCJyb2xlIjoiIn0.kykNwBojwUwqO8r16SZ1NfdLxV2Bv-PR1PJUpBhxBMM"
+        'api_key': "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ZWJAdHZyLmVzIiwianRpIjoiZmFkNGVlYmUtYzFlYi00ZjUwLWFkOGMtY2NlMTlkMDY4YjdhIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE1NjgzNjY2MTEsInVzZXJJZCI6ImZhZDRlZWJlLWMxZWItNGY1MC1hZDhjLWNjZTE5ZDA2OGI3YSIsInJvbGUiOiIifQ.ILskXBCqvM1uENPUkzHiFNF_0HcvQERcq_tnc-8p-uY"
     }
     respuesdeapi = requests.request("GET", urldellamada, data=payload, headers=headers)
     diccionarioderespuesta = json.loads(respuesdeapi.text)
@@ -96,7 +100,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
         mediolluvia = ['23', '24', '25', '43', '44', '45']
         lluvia = ['26', '27', '46']
         nieve = ['33', '34', '35', '36']
-        print (codigo)
+        tormenta = ['51','52', '53', '54', '55', '56']
         if codigo == '11':
             #print('Despejado')
             return '1'
@@ -115,7 +119,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
         elif codigo in nieve:
             #print('Nieve')
             return '4'
-        elif codigo == '53':
+        elif codigo in tormenta:
             #print('Tormenta')
             return '7'
         elif codigo == ' ':
@@ -147,7 +151,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     payload = ''
     headers = {
         'accept': 'application/json',
-        'api_key': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhaHVydGFkb0B0dnJpb2phLmNvbSIsImp0aSI6IjBiYzQxMGQyLTc1NjAtNDYyMS05ZjgxLTEwOWE4N2YxZDE2YSIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTY1Njk1OTk2LCJ1c2VySWQiOiIwYmM0MTBkMi03NTYwLTQ2MjEtOWY4MS0xMDlhODdmMWQxNmEiLCJyb2xlIjoiIn0.kykNwBojwUwqO8r16SZ1NfdLxV2Bv-PR1PJUpBhxBMM'
+        'api_key': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ZWJAdHZyLmVzIiwianRpIjoiZmFkNGVlYmUtYzFlYi00ZjUwLWFkOGMtY2NlMTlkMDY4YjdhIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE1NjgzNjY2MTEsInVzZXJJZCI6ImZhZDRlZWJlLWMxZWItNGY1MC1hZDhjLWNjZTE5ZDA2OGI3YSIsInJvbGUiOiIifQ.ILskXBCqvM1uENPUkzHiFNF_0HcvQERcq_tnc-8p-uY'
     }
     urldeprediccion = ('https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/' + municipio)
     respuesdeapi = requests.request("GET", urldeprediccion, data=payload, headers=headers)
@@ -176,20 +180,17 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     precipitacionuno = diauno['probPrecipitacion']
     precipitacionuno = precipitacionuno[0]
     cantidadprecipitacionuno = precipitacionuno['value']
-    print('Hoy, el porcentaje de probabilidad de precipitacion en ' + nombremunicipio + '  es ' + str(
-        cantidadprecipitacionuno) + '%')
+
     # Importa en variable la probabilidad de precipitación general del segundo día
     precipitaciondos = diados['probPrecipitacion']
     precipitaciondos = precipitaciondos[0]
     cantidadprecipitaciondos = precipitaciondos['value']
-    print('Mañana, el porcentaje de probabilidad de precipitacion en ' + nombremunicipio + ' es ' + str(
-        cantidadprecipitaciondos) + '%')
+
     # Importa en variable la probabilidad de precipitación general del tercer día
     precipitaciontres = diatres['probPrecipitacion']
     precipitaciontres = precipitaciontres[0]
     cantidadprecipitaciontres = precipitaciontres['value']
-    print('Pasado-mañana, el porcentaje de probabilidad de precipitacion en ' + nombremunicipio + ' es ' + str(
-        cantidadprecipitaciontres) + '%')
+
     # Importa en variable la probabilidad de precipitación general del cuarto día
     precipitacioncuatro = diacuatro['probPrecipitacion']
     precipitacioncuatro = precipitacioncuatro[0]
@@ -206,20 +207,16 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     tempuno = diauno['temperatura']
     tempmaxuno = tempuno['maxima']
     tempminuno = tempuno['minima']
-    print('La mínima de hoy en ' + nombremunicipio + ' ' + str(tempminuno) + 'º y la máxima es de ' + str(
-        tempmaxuno) + 'º')
     # La temperatura de mañana...
     tempdos = diados['temperatura']
     tempmaxdos = tempdos['maxima']
     tempmindos = tempdos['minima']
-    print('La mínima de mañana en ' + nombremunicipio + ' ' + str(tempmindos) + 'º y la máxima es de ' + str(
-        tempmaxdos) + 'º')
+
     # La temperatura de pasadomañana...
     temptres = diatres['temperatura']
     tempmaxtres = temptres['maxima']
     tempmintres = temptres['minima']
-    print('La mínima de pasadomañana en ' + nombremunicipio + ' ' + str(tempmintres) + 'º y la máxima es de ' + str(
-        tempmaxtres) + 'º')
+
     # And so on...
     tempcuatro = diacuatro['temperatura']
     tempmaxcuatro = tempcuatro['maxima']
@@ -235,37 +232,31 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     # Ahora el estado del cielo, que este tiene más intringulis. Primer estado
     estadouno = diauno['estadoCielo']
     estadouno = estadouno[0]
-    print(estadouno['descripcion'])
     estadouno = estadouno['value']
     estadouno = interpretarcodigosestado(estadouno)
     # Estado del cielo dos
     estadodos = diados['estadoCielo']
     estadodos = estadodos[0]
-    print(estadodos['descripcion'])
     estadodos = estadodos['value']
     estadodos = interpretarcodigosestado(estadodos)
     # Estado del cielo tres
     estadotres = diatres['estadoCielo']
     estadotres = estadotres[0]
-    print(estadotres['descripcion'])
     estadotres = estadotres['value']
     estadotres = interpretarcodigosestado(estadotres)
     # Estad del cuelo cuatro
     estadocuatro = diacuatro['estadoCielo']
     estadocuatro = estadocuatro[0]
-    print(estadocuatro['descripcion'])
     estadocuatro = estadocuatro['value']
     estadocuatro = interpretarcodigosestado(estadocuatro)
     # Estado del cielo cinco
     estadocinco = diacinco['estadoCielo']
     estadocinco = estadocinco[0]
-    print(estadocinco['descripcion'])
     estadocinco = estadocinco['value']
     estadocinco = interpretarcodigosestado(estadocinco)
     #Estado del cielo seis
     estadoseis = diaseis['estadoCielo']
     estadoseis = estadoseis[0]
-    print(estadoseis['descripcion'])
     estadoseis = estadoseis['value']
     estadoseis = interpretarcodigosestado(estadoseis)
     #Ahora cogeremos las fechas porque las necesitamos para escribir los dias de la semana
@@ -342,13 +333,5 @@ importarprediccionesespecificas(codigosmunicipio['domingo'], 'StoDomingo')
 importarprediccionesespecificas(codigosmunicipio['cervera'], 'Cervera')
 importarprediccionesespecificas(codigosmunicipio['arnedo'], 'Arnedo')
 importarprediccionesespecificas(codigosmunicipio['ezcaray'], 'Ezcaray')
-
-
-
-
-
-
-
-
-
-terminarscript = input('Pulse Intro para terminar...')
+print("SCRIPT TERMINADO. SE CERRARÁ SOLO EN TRES SEGUNDOS")
+time.sleep(3)

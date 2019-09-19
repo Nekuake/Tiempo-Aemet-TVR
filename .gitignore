@@ -18,3 +18,5 @@ dist/Main/
 Main.spec
 
 *.ini
+
+webcams/

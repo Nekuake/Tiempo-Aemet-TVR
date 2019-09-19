@@ -3,18 +3,156 @@
   <Configs name="configs">
     <Config>Configs\Default</Config>
   </Configs>
+  <datafiles number="13" name="datafiles"/>
   <NewExtensions/>
-  <sounds name="sound"/>
-  <sprites name="sprites"/>
+  <sounds name="sound">
+    <sound>sound\back</sound>
+  </sounds>
+  <sprites name="sprites">
+    <sprite>sprites\tormenta</sprite>
+    <sprite>sprites\cubierto</sprite>
+    <sprite>sprites\despejado</sprite>
+    <sprite>sprites\nieve</sprite>
+    <sprite>sprites\lluvia</sprite>
+    <sprite>sprites\medio_nublao</sprite>
+    <sprite>sprites\medio_lluvia</sprite>
+    <sprite>sprites\mapa_spr</sprite>
+    <sprite>sprites\atras_rioja</sprite>
+    <sprite>sprites\etiqueta</sprite>
+    <sprites name="iconos_mapa">
+      <sprite>sprites\mediolluvia_mapa</sprite>
+      <sprite>sprites\cubierto_mapa</sprite>
+      <sprite>sprites\tormenta_mapa</sprite>
+      <sprite>sprites\lluvia_mapa</sprite>
+      <sprite>sprites\medio_nublao_mapa</sprite>
+      <sprite>sprites\nieve_mapa</sprite>
+      <sprite>sprites\despejado_mapa</sprite>
+    </sprites>
+    <sprite>sprites\manana_cartel</sprite>
+    <sprite>sprites\hoy_cartel</sprite>
+    <sprite>sprites\arrow</sprite>
+    <sprite>sprites\cuadrado_blanco</sprite>
+    <sprite>sprites\tabla</sprite>
+    <sprite>sprites\drops_spr</sprite>
+    <sprite>sprites\Logro_o_tablas</sprite>
+    <sprite>sprites\haro_cartel</sprite>
+    <sprite>sprites\calahorra_cartel</sprite>
+  </sprites>
   <backgrounds name="background">
-    <background>background\calahorra</background>
+    <background>background\CABECERA</background>
+    <background>background\mapa_back</background>
   </backgrounds>
-  <paths name="paths"/>
+  <paths name="paths">
+    <path>paths\ending</path>
+  </paths>
+  <fonts name="fonts">
+    <font>fonts\mapa_font</font>
+    <font>fonts\temperatura_max</font>
+    <font>fonts\tablas_font</font>
+  </fonts>
   <objects name="objects">
-    <object>objects\Controlador_Calahorra</object>
+    <object>objects\carga_assets</object>
+    <objects name="mapa">
+      <objects name="etiquetas_hoy">
+        <object>objects\alfaro_tag</object>
+        <object>objects\arnedo_tag</object>
+        <object>objects\calahorra_tag</object>
+        <object>objects\cervera_tag</object>
+        <object>objects\ezcaray_tag</object>
+        <object>objects\haro_tag</object>
+        <object>objects\logrono_tag</object>
+        <object>objects\najera_tag</object>
+        <object>objects\domingo_tag</object>
+        <object>objects\torrecilla_tag</object>
+      </objects>
+      <objects name="etiquetas_manana">
+        <object>objects\arnedo_manana</object>
+        <object>objects\domingo_manana</object>
+        <object>objects\ezcaray_manana</object>
+        <object>objects\haro_manana</object>
+        <object>objects\najera_manana</object>
+        <object>objects\logrono_manana</object>
+        <object>objects\cervera_manana</object>
+        <object>objects\calahorra_manana</object>
+        <object>objects\torrecilla_manana</object>
+        <object>objects\alfaro_manana</object>
+      </objects>
+      <object>objects\mapa_fondos</object>
+      <object>objects\glow_map</object>
+      <object>objects\mapa_control</object>
+      <objects name="estados">
+        <object>objects\despejado_map_obj</object>
+        <object>objects\lluvia_map_obj</object>
+        <object>objects\nieve_map_obj</object>
+        <object>objects\mediolluvia_map_obj</object>
+        <object>objects\tormenta_map_obj</object>
+        <object>objects\cubierto_map_obj</object>
+        <object>objects\medionublao_map_obj</object>
+      </objects>
+      <object>objects\cuadrado_hoy0</object>
+      <object>objects\manana_cartel_obj</object>
+      <object>objects\flecha</object>
+    </objects>
+    <objects name="tablas">
+      <objects name="variables contenidas">
+        <objects name="logrono_group">
+          <object>objects\logrono_uno</object>
+          <object>objects\logrono_dos</object>
+          <object>objects\logrono_tres</object>
+          <object>objects\logrono_cuatro</object>
+          <object>objects\logrono_cinco</object>
+          <object>objects\logrono_seis</object>
+          <object>objects\controlador_tablas_log</object>
+        </objects>
+        <objects name="calahorra_group">
+          <object>objects\calahorra_uno</object>
+          <object>objects\calahorra_dos</object>
+          <object>objects\calahorra_tres</object>
+          <object>objects\calahorra_cuatro</object>
+          <object>objects\calahorra_cinco</object>
+          <object>objects\calahorra_seis</object>
+          <object>objects\controlador_tablas_cal</object>
+        </objects>
+        <objects name="haro_group">
+          <object>objects\haro_uno</object>
+          <object>objects\haro_dos</object>
+          <object>objects\haro_tres</object>
+          <object>objects\haro_cuatro</object>
+          <object>objects\haro_cinco</object>
+          <object>objects\haro_seis</object>
+          <object>objects\controlador_tablas_haro</object>
+        </objects>
+      </objects>
+      <objects name="simbolos">
+        <object>objects\lluvia_tabla_obj</object>
+        <object>objects\mediolluvia_tabla_obj</object>
+        <object>objects\cubierto_tabla_obj</object>
+        <object>objects\medionublao_tabla_obj</object>
+        <object>objects\tormenta_tabla_obj</object>
+        <object>objects\nieve_tabla_obj</object>
+        <object>objects\despejado_tabla_obj</object>
+      </objects>
+      <object>objects\Logrono_titulo</object>
+      <object>objects\haro_cartel_obj</object>
+      <object>objects\calahorra_cartel_obj</object>
+      <object>objects\pasador</object>
+    </objects>
+    <object>objects\tablas_texto</object>
+    <object>objects\finish_warn</object>
+    <object>objects\sonido</object>
   </objects>
+  <timelines name="timelines">
+    <timeline>timelines\fondos_mapa</timeline>
+    <timeline>timelines\transicion_tablas</timeline>
+  </timelines>
   <rooms name="rooms">
-    <room>rooms\room0</room>
+    <room>rooms\__INIT__</room>
+    <room>rooms\Mapa</room>
+    <room>rooms\manana</room>
+    <room>rooms\tablas_LOGRONO</room>
+    <room>rooms\tablas_calahorra</room>
+    <room>rooms\tablas_HARO</room>
+    <room>rooms\terminacion</room>
   </rooms>
   <help>
     <rtf>help.rtf</rtf>
