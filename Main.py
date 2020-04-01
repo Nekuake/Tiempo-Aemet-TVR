@@ -131,7 +131,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
             return '2'
 
     def interpretafecha(fecha):
-        conversionfecha = datetime.datetime.strptime(fecha, '%Y-%m-%d').weekday()
+        conversionfecha = datetime.datetime.strptime(fecha[0:10], '%Y-%m-%d').weekday()
         conversionfecha=(calendar.day_name[conversionfecha])
         if conversionfecha == 'Monday':
             return 1
