@@ -379,3 +379,4 @@ if berhwgq344b3t == "trueee":
     importarprediccionesespecificas(codigosmunicipio['ezcaray'], 'Ezcaray')
     print("SCRIPT TERMINADO. SE CERRARÁ SOLO EN TRES SEGUNDOS")
     time.sleep(3)
+    exit()
