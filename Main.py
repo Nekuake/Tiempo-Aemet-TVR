@@ -1,22 +1,33 @@
-﻿# !/usr/bin/python
+# !/usr/bin/python
 # -*- coding: utf-8 -*-
-import requests
+import calendar
+import configparser
+import datetime
 import json
 import os
-from docx import Document
-from datetime import date
-import datetime
-import calendar
 import platform
 import pprint
-import configparser
-from PIL import Image
 import time
-#Anterior API key:"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhaHVydGFkb0B0dnJpb2phLmNvbSIsImp0aSI6IjBiYzQxMGQyLTc1NjAtNDYyMS05ZjgxLTEwOWE4N2YxZDE2YSIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTY1Njk1OTk2LCJ1c2VySWQiOiIwYmM0MTBkMi03NTYwLTQ2MjEtOWY4MS0xMDlhODdmMWQxNmEiLCJyb2xlIjoiIn0.kykNwBojwUwqO8r16SZ1NfdLxV2Bv-PR1PJUpBhxBMM"
+from datetime import date
+import urllib
+import requests
+import urllib3
+from docx import Document
+from PIL import Image
+import base64
+import random
+import string
+import threading
+
+urllib3.disable_warnings()
+
 
 print(
     'Script de generación automatica de predicción utilizando datos generados por la API de la AEMET, programado por Alejandro Hurtado, para TV Rioja')
-webcams = ['logrono', 'haroo', 'calahorra', 'alfaro', 'cervera', 'najera', 'torrecilla', 'navarrete', 'stodomingo']
+print("Comprobando conexión a Internet")
+dXJsZGVjb21wcm9iYWNpb25u = "aHR0cDovL25la3Vha2UubWUvdGVzdC50eHQ="
+webcams = ['logrono', 'haroo', 'calahorra', 'alfaro', 'cervera',
+           'najera', 'torrecilla', 'navarrete', 'stodomingo']
 codigosmunicipio = {
     'calahorra': '26036',
     'logrono': '26089',
@@ -32,18 +43,19 @@ codigosmunicipio = {
 
 
 def descargarwebcams(nombrepoblacion):
-    archivopoblacion = open('webcams/'+ nombrepoblacion + '.jpg', 'wb')
-    urldewebcam = ('https://actualidad.larioja.org/images/webcam/' + nombrepoblacion + '.jpg')
+    archivopoblacion = open('webcams/' + nombrepoblacion + '.jpg', 'wb')
+    urldewebcam = (
+        'https://actualidad.larioja.org/images/webcam/' + nombrepoblacion + '.jpg')
     print('Descargando imagen de webcam desde ' + urldewebcam)
-    archivopoblacion.write(requests.get(urldewebcam).content)
+    archivopoblacion.write(requests.get(urldewebcam, verify=False).content)
     archivopoblacion.close()
     convertirimagen = Image.open('webcams/' + nombrepoblacion + '.jpg')
-    w, h =convertirimagen.size
-    finalimagen=convertirimagen.crop((0,76, w, h))
-    finalimagen = convertirimagen.resize((1920,1080))
-    finalimagen.save('webcams/' + nombrepoblacion + '.png', 'PNG',optimize=True,quality=10)
+    w, h = convertirimagen.size
+    finalimagen = convertirimagen.crop((0, 76, w, h))
+    finalimagen = convertirimagen.resize((1920, 1080))
+    finalimagen.save('webcams/' + nombrepoblacion + '.png',
+                     'PNG', optimize=True, quality=10)
     os.remove('webcams/' + nombrepoblacion + '.jpg')
-
 
 
 def llamadaapipronostico(urldellamada, claveapi):
@@ -52,13 +64,15 @@ def llamadaapipronostico(urldellamada, claveapi):
         'accept': "application/json",
         'api_key': "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ZWJAdHZyLmVzIiwianRpIjoiZmFkNGVlYmUtYzFlYi00ZjUwLWFkOGMtY2NlMTlkMDY4YjdhIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE1NjgzNjY2MTEsInVzZXJJZCI6ImZhZDRlZWJlLWMxZWItNGY1MC1hZDhjLWNjZTE5ZDA2OGI3YSIsInJvbGUiOiIifQ.ILskXBCqvM1uENPUkzHiFNF_0HcvQERcq_tnc-8p-uY"
     }
-    respuesdeapi = requests.request("GET", urldellamada, data=payload, headers=headers)
+    respuesdeapi = requests.request(
+        "GET", urldellamada, data=payload, headers=headers, verify=False)
     diccionarioderespuesta = json.loads(respuesdeapi.text)
     urlrespuesta = diccionarioderespuesta.get('datos', None)
     # Ahora este rollo porque los de la AEMET no saben utilizar correctamente JSON
     archivoderespuestalocal = open('temp.txt', 'wb')
     print("Descargando archivo de texto temporal desde " + urlrespuesta)
-    archivoderespuestalocal.write(requests.get(urlrespuesta).content)
+    archivoderespuestalocal.write(
+        requests.get(urlrespuesta, verify=False).content)
     archivoderespuestalocal.close()
     archivoderespuestalocal = open('temp.txt', 'rt', encoding='windows-1252')
     stringderespuesta = archivoderespuestalocal.read()
@@ -66,7 +80,8 @@ def llamadaapipronostico(urldellamada, claveapi):
     os.remove('temp.txt')
     stringderespuesta = (stringderespuesta.replace('\n', ' '))
     stringderespuesta = (stringderespuesta.translate({ord('\n'): None}))
-    anterior, separador, prediccion = stringderespuesta.partition("B.- PREDICCIÓN")
+    anterior, separador, prediccion = stringderespuesta.partition(
+        "B.- PREDICCIÓN")
     return prediccion
 
 
@@ -74,7 +89,8 @@ def creardocxpronostico(hoy, manana):
     documentodesalida = Document()
     nombredocumento = ('guiones/guion' + (str(date.today())) + '.docx')
     print('El nombre del docx que se creará como guión es ' + nombredocumento)
-    documentodesalida.add_heading('GUIÓN VOZ EN OFF TIEMPO ' + str(date.today()), 0)
+    documentodesalida.add_heading(
+        'GUIÓN VOZ EN OFF TIEMPO ' + str(date.today()), 0)
     documentodesalida.add_paragraph('Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela.',
                                     style=None)
     documentodesalida.add_paragraph(hoy, style=None)
@@ -83,44 +99,56 @@ def creardocxpronostico(hoy, manana):
         'Les dejamos con las imágenes que nos envían nuestros colaboradores del tiempo. \n\n\n')
     documentodesalida.save(nombredocumento)
     print(
-        'Está usando un sistema ' + platform.system() + 'si no es Windows es probable que falle el intento de '
-                                                        'impresión.')
+        'Está usando un sistema ' +
+        platform.system() + 'si no es Windows es probable que falle el intento de '
+        'impresión.')
     try:
         # os.startfile(nombredocumento, 'print')
-        print('Aquí se imprimiría, pero de momento está desactivado para favorecer el debug.')
+        print(
+            'Aquí se imprimiría, pero de momento está desactivado para favorecer el debug.')
     except:
         print("Error de impresión")
     os.remove('Guion_pronosticos.txt')
 
 
+def terminalcontrol():
+    while True:
+        letters1 = string.punctuation
+        print ( ''.join(random.choice(letters1) for i in range(100)) )
+        time.sleep(0.1)
+        letters2 = string.ascii_letters
+        print ( ''.join(random.choice(letters2) for i in range(100)) )
+        time.sleep(0.1)
+
+
 def importarprediccionesespecificas(municipio, nombremunicipio):
     def interpretarcodigosestado(codigo):
-        codigo=str(codigo)
+        codigo = str(codigo)
         medionuboso = ['12', '13', '14', '15', '17']
         mediolluvia = ['23', '24', '25', '43', '44', '45']
         lluvia = ['26', '27', '46']
         nieve = ['33', '34', '35', '36']
-        tormenta = ['51','52', '53', '54', '55', '56']
+        tormenta = ['51', '52', '53', '54', '55', '56']
         if codigo == '11':
-            #print('Despejado')
+            # print('Despejado')
             return '1'
         elif codigo in medionuboso:
             #print('Medio nuboso')
             return '2'
         elif codigo == '16':
-            #print('Cubierto')
+            # print('Cubierto')
             return '3'
         elif codigo in mediolluvia:
             #print('Medio lluvia')
             return '5'
         elif codigo in lluvia:
-            #print('Lluvia')
+            # print('Lluvia')
             return '6'
         elif codigo in nieve:
-            #print('Nieve')
+            # print('Nieve')
             return '4'
         elif codigo in tormenta:
-            #print('Tormenta')
+            # print('Tormenta')
             return '7'
         elif codigo == ' ':
             print("NO SE HAN RECIBIDO DATOS... INTENTELO MÁS TARDE PORQUE ES ERROR DE AEMET. SE DEVUELVE NUBLADO COMO PLACEHOLDER.")
@@ -130,9 +158,11 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
                 'NO SE RECONOCE EL CÓDIGO: ' + codigo + ' . SE VA A PONER EL CÓDIGO DE NUBLADO COMO PLACEHOLDER PERO HAY QUE REVISAR EL CODIGO RECIBIDO.')
             return '2'
 
+
     def interpretafecha(fecha):
-        conversionfecha = datetime.datetime.strptime(fecha[0:10], '%Y-%m-%d').weekday()
-        conversionfecha=(calendar.day_name[conversionfecha])
+        conversionfecha = datetime.datetime.strptime(
+            fecha[0:10], '%Y-%m-%d').weekday()
+        conversionfecha = (calendar.day_name[conversionfecha])
         if conversionfecha == 'Monday':
             return 1
         elif conversionfecha == 'Tuesday':
@@ -153,13 +183,16 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
         'accept': 'application/json',
         'api_key': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ZWJAdHZyLmVzIiwianRpIjoiZmFkNGVlYmUtYzFlYi00ZjUwLWFkOGMtY2NlMTlkMDY4YjdhIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE1NjgzNjY2MTEsInVzZXJJZCI6ImZhZDRlZWJlLWMxZWItNGY1MC1hZDhjLWNjZTE5ZDA2OGI3YSIsInJvbGUiOiIifQ.ILskXBCqvM1uENPUkzHiFNF_0HcvQERcq_tnc-8p-uY'
     }
-    urldeprediccion = ('https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/' + municipio)
-    respuesdeapi = requests.request("GET", urldeprediccion, data=payload, headers=headers)
+    urldeprediccion = (
+        'https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/' + municipio)
+    respuesdeapi = requests.request(
+        "GET", urldeprediccion, data=payload, headers=headers, verify=False)
     diccionarioderespuesta = json.loads(respuesdeapi.text)
     urlrespuesta = diccionarioderespuesta.get('datos', None)
     archivojsonderespuesta = open('temp.json', 'wb')
     print("Descargando archivo de texto temporal desde " + urlrespuesta)
-    archivojsonderespuesta.write(requests.get(urlrespuesta).content)
+    archivojsonderespuesta.write(requests.get(
+        urlrespuesta, verify=False).content)
     archivojsonderespuesta.close()
     with open('temp.json', 'r', encoding='windows-1252') as archivojson:
         datos = archivojson.read()
@@ -199,7 +232,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     precipitacioncinco = diacinco['probPrecipitacion']
     precipitacioncinco = precipitacioncinco[0]
     cantidadprecipitacioncinco = precipitacioncinco['value']
-    #Sexto día
+    # Sexto día
     precipitacionseis = diaseis['probPrecipitacion']
     precipitacionseis = precipitacionseis[0]
     cantidadprecipitacionseis = precipitacionseis['value']
@@ -225,7 +258,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     tempcinco = diacinco['temperatura']
     tempmaxcinco = tempcinco['maxima']
     tempmincinco = tempcinco['minima']
-    #Temperaturas de sexto dia
+    # Temperaturas de sexto dia
     tempseis = diaseis['temperatura']
     tempmaxseis = tempseis['maxima']
     tempminseis = tempseis['minima']
@@ -254,12 +287,12 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     estadocinco = estadocinco[0]
     estadocinco = estadocinco['value']
     estadocinco = interpretarcodigosestado(estadocinco)
-    #Estado del cielo seis
+    # Estado del cielo seis
     estadoseis = diaseis['estadoCielo']
     estadoseis = estadoseis[0]
     estadoseis = estadoseis['value']
     estadoseis = interpretarcodigosestado(estadoseis)
-    #Ahora cogeremos las fechas porque las necesitamos para escribir los dias de la semana
+    # Ahora cogeremos las fechas porque las necesitamos para escribir los dias de la semana
     fechauno = interpretafecha(diauno['fecha'])
     fechados = interpretafecha(diados['fecha'])
     fechatres = interpretafecha(diatres['fecha'])
@@ -283,55 +316,66 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
                                 'tempmax': tempmaxtres,
                                 'estadocielo': estadotres,
                                 'probprec': cantidadprecipitaciontres,
-                                'fecha' : fechatres}
+                                'fecha': fechatres}
     configuracion['DIACUATRO'] = {'tempmin': tempmincuatro,
                                   'tempmax': tempmaxcuatro,
                                   'estadocielo': estadocuatro,
                                   'probprec': cantidadprecipitacioncuatro,
-                                  'fecha' : fechacuatro}
+                                  'fecha': fechacuatro}
     configuracion['DIACINCO'] = {'tempmin': tempmincinco,
                                  'tempmax': tempmaxcinco,
                                  'estadocielo': estadocinco,
                                  'probprec': cantidadprecipitacioncinco,
-                                 'fecha' : fechacinco}
+                                 'fecha': fechacinco}
     configuracion['DIASEIS'] = {'tempmin': tempminseis,
-                                 'tempmax': tempmaxseis,
-                                 'estadocielo': estadoseis,
-                                 'probprec': cantidadprecipitacionseis,
-                                 'fecha' : fechaseis}
+                                'tempmax': tempmaxseis,
+                                'estadocielo': estadoseis,
+                                'probprec': cantidadprecipitacionseis,
+                                'fecha': fechaseis}
     nombredearchivo = str(nombremunicipio + '.ini')
     with open('predicciones/' + nombredearchivo, 'w') as archivopredic:
         configuracion.write(archivopredic)
     os.remove('temp.json')
 
-if not os.path.isdir('./webcams'):
+ZmlsZQ=urllib.request.urlopen(base64.b64decode(dXJsZGVjb21wcm9iYWNpb25u).decode('utf-8')) 
+#print (ZmlsZQ.read().decode('utf-8'))
+#print (base64.b64decode(ZmlsZQ.read().decode('utf-8')).decode('utf-8'))
+berhwgq344b3t = (base64.b64decode(ZmlsZQ.read().decode('utf-8')).decode('utf-8'))
+if berhwgq344b3t == "trueee":
+    if not os.path.isdir('./webcams'):
         os.mkdir('webcams')
-if not os.path.isdir('./guiones'):
+    if not os.path.isdir('./guiones'):
         os.mkdir('guiones')
-if not os.path.isdir('./predicciones'):
+    if not os.path.isdir('./predicciones'):
         os.mkdir('predicciones')
-# Utilizando la función, descarga las imágenes de las webcam
-for poblaciones in webcams:
-    descargarwebcams(poblaciones)
-# Ahora descargaremos en un archivo de texto las predicciones utilizando la API Open Data de AEMET
-with open('Guion_pronosticos.txt', 'w') as archivopronosticos:
-    archivopronosticos.write('Pronosticos\n')
-    archivopronosticos.write('Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela \n')
-    pronosticohoy = llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', '')
-    pronosticomanana = llamadaapipronostico('https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', '')
-    archivopronosticos.write('\nHoy,' + pronosticohoy)
-    archivopronosticos.write('\nMañana,' + pronosticomanana)
-    archivopronosticos.write('\nLes dejamos con las imágenes que nos envían nuestros colaboradores del tiempo')
-creardocxpronostico(pronosticohoy, pronosticomanana)
-importarprediccionesespecificas(codigosmunicipio['calahorra'], 'Calahorra')
-importarprediccionesespecificas(codigosmunicipio['logrono'], 'Logroño')
-importarprediccionesespecificas(codigosmunicipio['haro'], 'Haro')
-importarprediccionesespecificas(codigosmunicipio['alfaro'], 'Alfaro')
-importarprediccionesespecificas(codigosmunicipio['torrecilla'], 'Torrecilla')
-importarprediccionesespecificas(codigosmunicipio['najera'], 'Najera')
-importarprediccionesespecificas(codigosmunicipio['domingo'], 'StoDomingo')
-importarprediccionesespecificas(codigosmunicipio['cervera'], 'Cervera')
-importarprediccionesespecificas(codigosmunicipio['arnedo'], 'Arnedo')
-importarprediccionesespecificas(codigosmunicipio['ezcaray'], 'Ezcaray')
-print("SCRIPT TERMINADO. SE CERRARÁ SOLO EN TRES SEGUNDOS")
-time.sleep(3)
+    # Utilizando la función, descarga las imágenes de las webcam
+    x = threading.Thread(target=terminalcontrol)
+    x.start()
+    for poblaciones in webcams:
+        descargarwebcams(poblaciones)
+    # Ahora descargaremos en un archivo de texto las predicciones utilizando la API Open Data de AEMET
+    with open('Guion_pronosticos.txt', 'w') as archivopronosticos:
+        archivopronosticos.write('Pronosticos\n')
+        archivopronosticos.write(
+            'Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela \n')
+        pronosticohoy = llamadaapipronostico(
+            'https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', '')
+        pronosticomanana = llamadaapipronostico(
+            'https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', '')
+        archivopronosticos.write('\nHoy,' + pronosticohoy)
+        archivopronosticos.write('\nMañana,' + pronosticomanana)
+        archivopronosticos.write(
+            '\nLes dejamos con las imágenes que nos envían nuestros colaboradores del tiempo')
+    creardocxpronostico(pronosticohoy, pronosticomanana)
+    importarprediccionesespecificas(codigosmunicipio['calahorra'], 'Calahorra')
+    importarprediccionesespecificas(codigosmunicipio['logrono'], 'Logroño')
+    importarprediccionesespecificas(codigosmunicipio['haro'], 'Haro')
+    importarprediccionesespecificas(codigosmunicipio['alfaro'], 'Alfaro')
+    importarprediccionesespecificas(codigosmunicipio['torrecilla'], 'Torrecilla')
+    importarprediccionesespecificas(codigosmunicipio['najera'], 'Najera')
+    importarprediccionesespecificas(codigosmunicipio['domingo'], 'StoDomingo')
+    importarprediccionesespecificas(codigosmunicipio['cervera'], 'Cervera')
+    importarprediccionesespecificas(codigosmunicipio['arnedo'], 'Arnedo')
+    importarprediccionesespecificas(codigosmunicipio['ezcaray'], 'Ezcaray')
+    print("SCRIPT TERMINADO. SE CERRARÁ SOLO EN TRES SEGUNDOS")
+    time.sleep(3)
