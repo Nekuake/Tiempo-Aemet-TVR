@@ -350,6 +350,7 @@ if berhwgq344b3t == "trueee":
         os.mkdir('predicciones')
     # Utilizando la función, descarga las imágenes de las webcam
     x = threading.Thread(target=terminalcontrol)
+    x.daemon = True
     x.start()
     for poblaciones in webcams:
         descargarwebcams(poblaciones)
