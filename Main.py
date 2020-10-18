@@ -1,4 +1,4 @@
-# !/usr/bin/python
+﻿# !/usr/bin/python
 # -*- coding: utf-8 -*-
 import calendar
 import configparser
@@ -25,7 +25,6 @@ urllib3.disable_warnings()
 print(
     'Script de generación automatica de predicción utilizando datos generados por la API de la AEMET, programado por Alejandro Hurtado, para TV Rioja')
 print("Comprobando conexión a Internet")
-dXJsZGVjb21wcm9iYWNpb25u = "aHR0cDovL25la3Vha2UubWUvdGVzdC50eHQ="
 webcams = ['logrono', 'haroo', 'calahorra', 'alfaro', 'cervera',
            'najera', 'torrecilla', 'navarrete', 'stodomingo']
 codigosmunicipio = {
@@ -111,14 +110,6 @@ def creardocxpronostico(hoy, manana):
     os.remove('Guion_pronosticos.txt')
 
 
-def terminalcontrol():
-    while True:
-        letters1 = string.punctuation
-        print ( ''.join(random.choice(letters1) for i in range(100)) )
-        time.sleep(0.1)
-        letters2 = string.ascii_letters
-        print ( ''.join(random.choice(letters2) for i in range(100)) )
-        time.sleep(0.1)
 
 
 def importarprediccionesespecificas(municipio, nombremunicipio):
@@ -181,7 +172,7 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     payload = ''
     headers = {
         'accept': 'application/json',
-        'api_key': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ZWJAdHZyLmVzIiwianRpIjoiZmFkNGVlYmUtYzFlYi00ZjUwLWFkOGMtY2NlMTlkMDY4YjdhIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE1NjgzNjY2MTEsInVzZXJJZCI6ImZhZDRlZWJlLWMxZWItNGY1MC1hZDhjLWNjZTE5ZDA2OGI3YSIsInJvbGUiOiIifQ.ILskXBCqvM1uENPUkzHiFNF_0HcvQERcq_tnc-8p-uY'
+        'api_key': 'rellenar'
     }
     urldeprediccion = (
         'https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/diaria/' + municipio)
@@ -190,15 +181,13 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
     diccionarioderespuesta = json.loads(respuesdeapi.text)
     urlrespuesta = diccionarioderespuesta.get('datos', None)
     archivojsonderespuesta = open('temp.json', 'wb')
+    print(urlrespuesta)
     print("Descargando archivo de texto temporal desde " + urlrespuesta)
     archivojsonderespuesta.write(requests.get(
         urlrespuesta, verify=False).content)
     archivojsonderespuesta.close()
     with open('temp.json', 'r', encoding='windows-1252') as archivojson:
         datos = archivojson.read()
-    # A partir de aquí el código se vuelve raro, pero es fácil de entender. Adjunto documentación,
-    # así que tranquilidad. Hago muchas variables y doy muchas vueltas porque he ido aprendiendo cómo iba su API a la
-    # vez que programaba.  Quedará claro en la doc.
     diccionariodeprediccion = json.loads(datos)
     diossabequeestoyhaciendo = (diccionariodeprediccion[0])
     predicciondiccionario = diossabequeestoyhaciendo['prediccion']
@@ -337,47 +326,40 @@ def importarprediccionesespecificas(municipio, nombremunicipio):
         configuracion.write(archivopredic)
     os.remove('temp.json')
 
-ZmlsZQ=urllib.request.urlopen(base64.b64decode(dXJsZGVjb21wcm9iYWNpb25u).decode('utf-8')) 
-#print (ZmlsZQ.read().decode('utf-8'))
-#print (base64.b64decode(ZmlsZQ.read().decode('utf-8')).decode('utf-8'))
-berhwgq344b3t = (base64.b64decode(ZmlsZQ.read().decode('utf-8')).decode('utf-8'))
-if berhwgq344b3t == "trueee":
-    if not os.path.isdir('./webcams'):
-        os.mkdir('webcams')
-    if not os.path.isdir('./guiones'):
-        os.mkdir('guiones')
-    if not os.path.isdir('./predicciones'):
-        os.mkdir('predicciones')
+if not os.path.isdir('./webcams'):
+    os.mkdir('webcams')
+if not os.path.isdir('./guiones'):
+    os.mkdir('guiones')
+if not os.path.isdir('./predicciones'):
+    os.mkdir('predicciones')
     # Utilizando la función, descarga las imágenes de las webcam
-    x = threading.Thread(target=terminalcontrol)
-    x.daemon = True
-    x.start()
-    for poblaciones in webcams:
-        descargarwebcams(poblaciones)
+
+for poblaciones in webcams:
+    descargarwebcams(poblaciones)
     # Ahora descargaremos en un archivo de texto las predicciones utilizando la API Open Data de AEMET
-    with open('Guion_pronosticos.txt', 'w') as archivopronosticos:
-        archivopronosticos.write('Pronosticos\n')
-        archivopronosticos.write(
-            'Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela \n')
-        pronosticohoy = llamadaapipronostico(
-            'https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', '')
-        pronosticomanana = llamadaapipronostico(
-            'https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', '')
-        archivopronosticos.write('\nHoy,' + pronosticohoy)
-        archivopronosticos.write('\nMañana,' + pronosticomanana)
-        archivopronosticos.write(
-            '\nLes dejamos con las imágenes que nos envían nuestros colaboradores del tiempo')
-    creardocxpronostico(pronosticohoy, pronosticomanana)
-    importarprediccionesespecificas(codigosmunicipio['calahorra'], 'Calahorra')
-    importarprediccionesespecificas(codigosmunicipio['logrono'], 'Logroño')
-    importarprediccionesespecificas(codigosmunicipio['haro'], 'Haro')
-    importarprediccionesespecificas(codigosmunicipio['alfaro'], 'Alfaro')
-    importarprediccionesespecificas(codigosmunicipio['torrecilla'], 'Torrecilla')
-    importarprediccionesespecificas(codigosmunicipio['najera'], 'Najera')
-    importarprediccionesespecificas(codigosmunicipio['domingo'], 'StoDomingo')
-    importarprediccionesespecificas(codigosmunicipio['cervera'], 'Cervera')
-    importarprediccionesespecificas(codigosmunicipio['arnedo'], 'Arnedo')
-    importarprediccionesespecificas(codigosmunicipio['ezcaray'], 'Ezcaray')
-    print("SCRIPT TERMINADO. SE CERRARÁ SOLO EN TRES SEGUNDOS")
-    time.sleep(3)
-    exit()
+with open('Guion_pronosticos.txt', 'w') as archivopronosticos:
+    archivopronosticos.write('Pronosticos\n')
+    archivopronosticos.write(
+        'Así ha amanecido en Logroño como se aprecia en este time-lapse de Meteo Sojuela \n')
+    pronosticohoy = llamadaapipronostico(
+        'https://opendata.aemet.es/opendata/api/prediccion/ccaa/hoy/rio', '')
+    pronosticomanana = llamadaapipronostico(
+        'https://opendata.aemet.es/opendata/api/prediccion/ccaa/manana/rio', '')
+    archivopronosticos.write('\nHoy,' + pronosticohoy)
+    archivopronosticos.write('\nMañana,' + pronosticomanana)
+    archivopronosticos.write(
+        '\nLes dejamos con las imágenes que nos envían nuestros colaboradores del tiempo')
+creardocxpronostico(pronosticohoy, pronosticomanana)
+importarprediccionesespecificas(codigosmunicipio['calahorra'], 'Calahorra')
+importarprediccionesespecificas(codigosmunicipio['logrono'], 'Logroño')
+importarprediccionesespecificas(codigosmunicipio['haro'], 'Haro')
+importarprediccionesespecificas(codigosmunicipio['alfaro'], 'Alfaro')
+importarprediccionesespecificas(codigosmunicipio['torrecilla'], 'Torrecilla')
+importarprediccionesespecificas(codigosmunicipio['najera'], 'Najera')
+importarprediccionesespecificas(codigosmunicipio['domingo'], 'StoDomingo')
+importarprediccionesespecificas(codigosmunicipio['cervera'], 'Cervera')
+importarprediccionesespecificas(codigosmunicipio['arnedo'], 'Arnedo')
+importarprediccionesespecificas(codigosmunicipio['ezcaray'], 'Ezcaray')
+print("SCRIPT TERMINADO. SE CERRARÁ SOLO EN TRES SEGUNDOS")
+time.sleep(3)
+exit()
