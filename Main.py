@@ -61,7 +61,7 @@ def llamadaapipronostico(urldellamada, claveapi):
     payload = ""
     headers = {
         'accept': "application/json",
-        'api_key': "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3ZWJAdHZyLmVzIiwianRpIjoiZmFkNGVlYmUtYzFlYi00ZjUwLWFkOGMtY2NlMTlkMDY4YjdhIiwiaXNzIjoiQUVNRVQiLCJpYXQiOjE1NjgzNjY2MTEsInVzZXJJZCI6ImZhZDRlZWJlLWMxZWItNGY1MC1hZDhjLWNjZTE5ZDA2OGI3YSIsInJvbGUiOiIifQ.ILskXBCqvM1uENPUkzHiFNF_0HcvQERcq_tnc-8p-uY"
+        'api_key': ""
     }
     respuesdeapi = requests.request(
         "GET", urldellamada, data=payload, headers=headers, verify=False)
